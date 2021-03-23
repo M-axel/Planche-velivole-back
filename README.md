@@ -1,2 +1,38 @@
 # Planche-velivole-back
-Backend d'un projet consistant à pratiquer le MERN stack.
+Backend d'un projet consistant à pratiquer le MERN stack. L'accent ne sera pas mis sur la gestion du projet (pas de découpage en itérations par exemple), ni sur le fait de créer quelque chose de réelement pertinent mais bien de travailler les concepts de React, Node + Express et MongoDB.
+
+Le but est de créer une Single Page Application qui permet de remplacer les planches que l'on trouve dans les aéroclubs vélivoles, planches sur lequelles on inscrit tous les vols d'une journée (document qui permet, ulterieurement, la facturation en fonction du temps de remorquage et le temps passé dans la cellule du planeur).
+
+## Liste des API
+
+<table>
+    <thead>
+        <tr>
+            <th>Type</th>
+          <th>Chemin</th>
+          <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>GET</td>
+            <td>/api/planche/:pid</td>
+          <td>Permet de récupérer une planche en fonction de son id (un objet Date)</td>
+        </tr>
+      <tr>
+            <td>POST</td>
+            <td>/api/planche/:pid/ligne/:lid</td>
+          <td>Permet d'ajouter une ligne à un tableau grâce à l'id des deux.</td>
+        </tr>
+      <tr>
+            <td>PATCH</td>
+            <td>/api/planche/:pid/ligne/:lid</td>
+          <td>Permet de modifier une ligne d'un tableau grâce à l'id des deux.</td>
+        </tr>
+      <tr>
+            <td>DELETE</td>
+            <td>/api/planche/:pid/ligne/:lid</td>
+          <td>Permet de supprimer une ligne d'un tableau grâce à l'id des deux.</td>
+        </tr>
+    </tbody>
+</table>
