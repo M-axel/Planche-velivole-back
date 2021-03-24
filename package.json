@@ -1,0 +1,27 @@
+{
+  "name": "planche-velivole-back",
+  "version": "1.0.0",
+  "description": "Backend d'un projet consistant à pratiquer le MERN stack. L'accent ne sera pas mis sur la gestion du projet (pas de découpage en itérations par exemple), ni sur le fait de créer quelque chose de réelement pertinent mais bien de travailler les concepts de React, Node + Express et MongoDB.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon serveur.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/M-axel/Planche-velivole-back.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/M-axel/Planche-velivole-back/issues"
+  },
+  "homepage": "https://github.com/M-axel/Planche-velivole-back#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "fastify": "^3.14.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
