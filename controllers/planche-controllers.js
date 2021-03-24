@@ -1,6 +1,7 @@
+const { nanoid } =  require("nanoid"); // enorme comme id pour le besoin que j'en ai
 //Dummy
 const DUMMY_TODAY= new Date((new Date().setHours(0,0,0,0)));
-  
+
 const DUMMY_DATA = [
   {
     plancheID: new Date(2021, 0, 1),
@@ -103,31 +104,37 @@ const DUMMY_DATA = [
   }
 ];
 
-async function routes (fastify, options) {
+const getPlancheByID = async (req, res) => {
+    // pid est un date.getTime() au format string
+    const plancheID = parseInt(req.params.pid);
 
-    // GET /planche/:pid
-    fastify.get('/:pid', async (req, res) => {
-        // pid est un date.getTime() au format string
-        const plancheID = parseInt(req.params.pid);
+    const planche = DUMMY_DATA.find(
+        (p) => p.plancheID.getTime() === plancheID
+    )
 
-        const planche = DUMMY_DATA.find(
-            (p) => p.plancheID.getTime() === plancheID
-        )
+    //console.log(planche);
 
-        //console.log(planche);
+    // Si on a pas pu recuperer de planche
+    if(!planche){
+        return res.code(404).send({message: "Aucune planche n'existe avec cet ID"});
+    } 
 
-        // Si on a pas pu recuperer de planche
-        if(!planche){
-            return res.code(404).send({message: "Aucune planche n'existe avec cet ID"});
-        } 
-
-        res.send({
-            plancheID: planche.plancheID,
-            data: planche.data
-        });
+    res.send({
+        plancheID: planche.plancheID,
+        data: planche.data
     });
-
-    
 };
-//  1609455600000
-module.exports = routes;
+
+
+// Les données (l'objet ligne) se trouve dans le body de la requete
+const ajouteLigne = async (req, res) => {
+  const plancheID = parseInt(req.params.pid);
+  const ligne = req.body;
+
+  ligne.volID = nanoid();
+
+  res.send(ligne);
+};
+
+exports.getPlancheByID = getPlancheByID;
+exports.ajouteLigne = ajouteLigne;
