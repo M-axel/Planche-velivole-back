@@ -1,6 +1,6 @@
-const { nanoid } =  require("nanoid"); // enorme comme id pour le besoin que j'en ai
+const { nanoid } = require("nanoid"); // enorme comme id pour le besoin que j'en ai
 //Dummy
-const DUMMY_TODAY= new Date((new Date().setHours(0,0,0,0)));
+const DUMMY_TODAY = new Date(new Date().setHours(0, 0, 0, 0));
 
 const DUMMY_DATA = [
   {
@@ -77,7 +77,8 @@ const DUMMY_DATA = [
         parachute: "21/23",
       },
     ],
-  },{
+  },
+  {
     plancheID: DUMMY_TODAY,
     data: [
       {
@@ -101,30 +102,29 @@ const DUMMY_DATA = [
         parachute: "21/23",
       },
     ],
-  }
+  },
 ];
 
 const getPlancheByID = async (req, res) => {
-    // pid est un date.getTime() au format string
-    const plancheID = parseInt(req.params.pid);
+  // pid est un date.getTime() au format string
+  const plancheID = parseInt(req.params.pid);
 
-    const planche = DUMMY_DATA.find(
-        (p) => p.plancheID.getTime() === plancheID
-    )
+  const planche = DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID);
 
-    //console.log(planche);
+  //console.log(planche);
 
-    // Si on a pas pu recuperer de planche
-    if(!planche){
-        return res.code(404).send({message: "Aucune planche n'existe avec cet ID"});
-    } 
+  // Si on a pas pu recuperer de planche
+  if (!planche) {
+    return res
+      .code(404)
+      .send({ message: "Aucune planche n'existe avec cet ID" });
+  }
 
-    res.send({
-        plancheID: planche.plancheID,
-        data: planche.data
-    });
+  res.send({
+    plancheID: planche.plancheID,
+    data: planche.data,
+  });
 };
-
 
 // Les données (l'objet ligne) se trouve dans le body de la requete
 const ajouteLigne = async (req, res) => {
@@ -133,8 +133,61 @@ const ajouteLigne = async (req, res) => {
 
   ligne.volID = nanoid();
 
-  res.send(ligne);
+  const indexPlanche = DUMMY_DATA.indexOf(
+    DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID)
+  );
+
+  DUMMY_DATA[indexPlanche].data.push(ligne);
+
+  res.send(DUMMY_DATA);
+};
+
+const modifieLigne = async (req, res) => {
+  const plancheID = parseInt(req.params.pid);
+  const ligne = req.body;
+
+  const planche = DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID);
+  const indexUpdatedPlanche = DUMMY_DATA.indexOf(planche);
+
+  // On copie la ligne, puis on la modifie afin d'éviter un conflit de modification
+  const updatedLine = {
+    ...DUMMY_DATA[indexUpdatedPlanche].data.find(
+      (li) => li.volID === ligne.volID
+    ),
+  };
+
+  // Répétitif mais impossible de faire un indexOf avec updatedLine puisque c'est une copie ...
+  const indexLine = DUMMY_DATA[indexUpdatedPlanche].data.indexOf(
+    DUMMY_DATA[indexUpdatedPlanche].data.find((li) => li.volID === ligne.volID)
+  );
+
+  // On modifie
+  updatedLine.placeArriere = ligne.placeArriere;
+  updatedLine.remorquage = ligne.remorquage;
+  updatedLine.atterrissage = ligne.atterrissage;
+  updatedLine.parachute = ligne.parachute;
+
+  // Puis on remplace
+  DUMMY_DATA[indexUpdatedPlanche].data[indexLine] = updatedLine;
+  res.send(DUMMY_DATA[indexUpdatedPlanche].data[indexLine]);
+};
+
+const supprimeLigne = async (req, res) => {
+  const plancheID = parseInt(req.params.pid);
+  const ligne = req.body;
+
+  const indexPlanche = DUMMY_DATA.indexOf(
+    DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID)
+  );
+
+  DUMMY_DATA[indexPlanche] = DUMMY_DATA[indexPlanche].data.filter(
+    (li) => li.volID !== ligne.volID
+  );
+
+  res.send(ligne.volID);
 };
 
 exports.getPlancheByID = getPlancheByID;
 exports.ajouteLigne = ajouteLigne;
+exports.modifieLigne = modifieLigne;
+exports.supprimeLigne = supprimeLigne;
