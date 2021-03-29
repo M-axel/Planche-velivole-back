@@ -19,6 +19,7 @@
   "homepage": "https://github.com/M-axel/Planche-velivole-back#readme",
   "dependencies": {
     "fastify": "^3.14.0",
+    "mongoose": "^5.12.2",
     "nanoid": "^3.1.22"
   },
   "devDependencies": {

@@ -1,4 +1,6 @@
 const { nanoid } = require("nanoid"); // enorme comme id pour le besoin que j'en ai
+const Ligne = require("../models/ligne"); // constructor
+
 //Dummy
 const DUMMY_TODAY = new Date(new Date().setHours(0, 0, 0, 0));
 
@@ -127,19 +129,50 @@ const getPlancheByID = async (req, res) => {
 };
 
 // Les données (l'objet ligne) se trouve dans le body de la requete
-const ajouteLigne = async (req, res) => {
+const ajouteLigne = async (req, res, next) => {
   const plancheID = parseInt(req.params.pid);
-  const ligne = req.body;
+  //const ligne = req.body;
+
+  // On récupère nos données
+  const {
+    avion,
+    planeur,
+    pilotePlaneur,
+    placeArriere,
+    remorquage,
+    atterrissage,
+    parachute,
+  } = req.body;
+
+  // On les injecte dans un objet ligne (Model mongoose)
+  // pas besoin de faire plancheID: plancheID puisque même nom
+  const ligne = new Ligne({
+    plancheID,
+    avion,
+    planeur,
+    pilotePlaneur,
+    placeArriere,
+    remorquage,
+    atterrissage,
+    parachute,
+  });
 
   ligne.volID = nanoid();
 
-  const indexPlanche = DUMMY_DATA.indexOf(
+  /*const indexPlanche = DUMMY_DATA.indexOf(
     DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID)
   );
+  DUMMY_DATA[indexPlanche].data.push(ligne);*/
 
-  DUMMY_DATA[indexPlanche].data.push(ligne);
+  // await pour etre sûr que la donnée est bien entrée dans la DB
+  try {
+    await ligne.save();
+  } catch (err) {
+    console.log("Erreur lors de la sauvegarde dans la base de donnée.");
+    return next(error);
+  };
 
-  res.send(DUMMY_DATA);
+  res.status(201).send(ligne);
 };
 
 const modifieLigne = async (req, res) => {
