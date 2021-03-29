@@ -38,3 +38,10 @@ Le but est de créer une Single Page Application qui permet de remplacer les pla
 </table>
 
 L'id de la planche à afficher (pid) est un objet date. Pour appeler l'API, il faut mettre cette date dans l'URL : on pourrait formater la date en un string 'YYYY-MM-DD' pour un question de lisibilité, mais puisque seul la machine va lire cette information, on va passer date.getTime().
+
+## Credentials
+Pour des raisons evidentes de sécurité, je n'ai pas donné en clair mes credentials d'accès/modification de la base de donnée.
+
+``` const data = fs.readFileSync('../Credentials/credential_mongo_planches.txt', 'utf8'); ```
+
+Dans `serveur.js` est recupéré un fichier qui contient l'username et le password au format username:passeword.
