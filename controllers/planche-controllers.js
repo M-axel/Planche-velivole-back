@@ -111,21 +111,36 @@ const getPlancheByID = async (req, res) => {
   // pid est un date.getTime() au format string
   const plancheID = parseInt(req.params.pid);
 
-  const planche = DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID);
+  //const planche = DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID);
+  let planche;
+  try{
+    planche = await Ligne.find({plancheID: plancheID});
+  } catch (err){
+    console.log("Aucunes lignes avec cette ID de planche "+ err);
+    return next(err);
+  }
 
   //console.log(planche);
 
+  // Autre erreur possible :
   // Si on a pas pu recuperer de planche
   if (!planche) {
     return res
       .code(404)
       .send({ message: "Aucune planche n'existe avec cet ID" });
+      return;
   }
 
   res.send({
+    plancheID,
+    // Getters pour avoir id et non _id
+    data: planche.map(ligne => ligne.toObject({ getters: true}))
+  });
+  /*res.send({
     plancheID: planche.plancheID,
     data: planche.data,
-  });
+  });*/
+
 };
 
 // Les données (l'objet ligne) se trouve dans le body de la requete
