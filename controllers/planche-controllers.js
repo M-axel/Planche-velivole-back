@@ -190,49 +190,97 @@ const ajouteLigne = async (req, res, next) => {
   res.status(201).send(ligne);
 };
 
-const modifieLigne = async (req, res) => {
+const modifieLigne = async (req, res, next) => {
   const plancheID = parseInt(req.params.pid);
-  const ligne = req.body;
+  
+  const {
+    id,
+    avion,
+    planeur,
+    pilotePlaneur,
+    placeArriere,
+    remorquage,
+    atterrissage,
+    parachute,
+  } = req.body;
+  
+  let ligne;
+  try {
+    ligne = await Ligne.findById(id);
+  } catch (err){
+    console.log("Impossible de recuperer cette ligne : "+ err);
+    return next(err);
+  }
 
+  /*
   const planche = DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID);
   const indexUpdatedPlanche = DUMMY_DATA.indexOf(planche);
+*/
 
   // On copie la ligne, puis on la modifie afin d'éviter un conflit de modification
-  const updatedLine = {
+  /*const updatedLine = {
     ...DUMMY_DATA[indexUpdatedPlanche].data.find(
       (li) => li.volID === ligne.volID
     ),
-  };
+  };*/
 
   // Répétitif mais impossible de faire un indexOf avec updatedLine puisque c'est une copie ...
-  const indexLine = DUMMY_DATA[indexUpdatedPlanche].data.indexOf(
+  /*const indexLine = DUMMY_DATA[indexUpdatedPlanche].data.indexOf(
     DUMMY_DATA[indexUpdatedPlanche].data.find((li) => li.volID === ligne.volID)
-  );
+  );*/
 
   // On modifie
-  updatedLine.placeArriere = ligne.placeArriere;
-  updatedLine.remorquage = ligne.remorquage;
-  updatedLine.atterrissage = ligne.atterrissage;
-  updatedLine.parachute = ligne.parachute;
+  ligne.avion = avion;
+  ligne.planeur = planeur;
+  ligne.pilotePlaneur = pilotePlaneur;
+  ligne.placeArriere = placeArriere;
+  ligne.remorquage = remorquage;
+  ligne.atterrissage = atterrissage;
+  ligne.parachute = parachute;
+
+  // enregistrement dans la database
+  try {
+    await ligne.save();
+  } catch (err){
+    console.log("L'enregistrement de la ligne modifiée a échoué : "+err);
+    return next(err);
+  }
 
   // Puis on remplace
+  /*
   DUMMY_DATA[indexUpdatedPlanche].data[indexLine] = updatedLine;
-  res.send(DUMMY_DATA[indexUpdatedPlanche].data[indexLine]);
+  res.send(DUMMY_DATA[indexUpdatedPlanche].data[indexLine]);*/
+
+  res.status(200).send({ ligne: ligne.toObject({getters: true}) });
 };
 
 const supprimeLigne = async (req, res) => {
-  const plancheID = parseInt(req.params.pid);
-  const ligne = req.body;
+  //const plancheID = parseInt(req.params.pid);
+  const ligneID = req.body.id;
 
+  /*
   const indexPlanche = DUMMY_DATA.indexOf(
     DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID)
   );
-
   DUMMY_DATA[indexPlanche] = DUMMY_DATA[indexPlanche].data.filter(
     (li) => li.volID !== ligne.volID
-  );
+  );*/
 
-  res.send(ligne.volID);
+  try {
+    ligne = await Ligne.findById(ligneID);
+  } catch (err){
+    console.log("Impossible de recuperer la ligne a supprimer : "+ err);
+    return next(err);
+  }
+
+  try {
+    await ligne.remove();
+  } catch (err){
+    console.log("Impossible de recuperer la ligne a supprimer : "+ err);
+    return next(err);
+  }
+
+  res.status(200).send({ message: 'Ligne supprimée.'});
 };
 
 exports.getPlancheByID = getPlancheByID;
