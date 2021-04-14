@@ -1,111 +1,6 @@
+const { default: fastify } = require("fastify");
 const { nanoid } = require("nanoid"); // enorme comme id pour le besoin que j'en ai
 const Ligne = require("../models/ligne"); // constructor
-
-//Dummy
-const DUMMY_TODAY = new Date(new Date().setHours(0, 0, 0, 0));
-
-const DUMMY_DATA = [
-  {
-    plancheID: new Date(2021, 0, 1),
-    data: [
-      {
-        volID: "0",
-        avion: { immat: "ZV", pilote: "LRC", code: "3208" },
-        planeur: { type: "LS6", immat1: "D", immat2: "G" },
-        pilotePlaneur: { nom: "DEWEZ", code: "544" },
-        placeArriere: { nom: "", code: "" },
-        remorquage: { heure: "11", minute: "49", temps: "6" },
-        atterrissage: { heure: "16", minute: "54" },
-        parachute: "22",
-      },
-      {
-        volID: "1",
-        avion: { immat: "ZM", pilote: "LRC", code: "3208" },
-        planeur: { type: "LS6", immat1: "D", immat2: "G" },
-        pilotePlaneur: { nom: "DEWEZ", code: "544" },
-        placeArriere: { nom: "", code: "" },
-        remorquage: { heure: "11", minute: "49", temps: "6" },
-        atterrissage: { heure: "16", minute: "54" },
-        parachute: "22",
-      },
-    ],
-  },
-  {
-    plancheID: new Date(2021, 0, 2),
-    data: [
-      {
-        volID: "0",
-        avion: { immat: "ZV", pilote: "LRC", code: "3208" },
-        planeur: { type: "LS6", immat1: "D", immat2: "G" },
-        pilotePlaneur: { nom: "DEWEZ", code: "544" },
-        placeArriere: { nom: "", code: "" },
-        remorquage: { heure: "11", minute: "49", temps: "6" },
-        atterrissage: { heure: "16", minute: "54" },
-        parachute: "22",
-      },
-      {
-        volID: "1",
-        avion: { immat: "ZV", pilote: "LRC", code: "3208" },
-        planeur: { type: "LS6", immat1: "D", immat2: "G" },
-        pilotePlaneur: { nom: "MAISSA", code: "544" },
-        placeArriere: { nom: "", code: "" },
-        remorquage: { heure: "11", minute: "49", temps: "6" },
-        atterrissage: { heure: "16", minute: "54" },
-        parachute: "22",
-      },
-    ],
-  },
-  {
-    plancheID: new Date(2021, 2, 15),
-    data: [
-      {
-        volID: "0",
-        avion: { immat: "ZV", pilote: "LRC", code: "3208" },
-        planeur: { type: "LS6", immat1: "D", immat2: "G" },
-        pilotePlaneur: { nom: "DEWEZ", code: "544" },
-        placeArriere: { nom: "", code: "" },
-        remorquage: { heure: "11", minute: "49", temps: "6" },
-        atterrissage: { heure: "16", minute: "54" },
-        parachute: "22",
-      },
-      {
-        volID: "1",
-        avion: { immat: "VZ", pilote: "STS", code: "328" },
-        planeur: { type: "LS6", immat1: "F", immat2: "A" },
-        pilotePlaneur: { nom: "OKLA", code: "514" },
-        placeArriere: { nom: "DELOR", code: "100" },
-        remorquage: { heure: "12", minute: "59", temps: "8" },
-        atterrissage: { heure: "18", minute: "00" },
-        parachute: "21/23",
-      },
-    ],
-  },
-  {
-    plancheID: DUMMY_TODAY,
-    data: [
-      {
-        volID: "0",
-        avion: { immat: "ZV", pilote: "LRC", code: "3208" },
-        planeur: { type: "LS6", immat1: "D", immat2: "G" },
-        pilotePlaneur: { nom: "DEWEZ", code: "544" },
-        placeArriere: { nom: "", code: "" },
-        remorquage: { heure: "11", minute: "49", temps: "6" },
-        atterrissage: { heure: "16", minute: "54" },
-        parachute: "22",
-      },
-      {
-        volID: "1",
-        avion: { immat: "VZ", pilote: "STS", code: "328" },
-        planeur: { type: "LS6", immat1: "F", immat2: "A" },
-        pilotePlaneur: { nom: "OKLA", code: "514" },
-        placeArriere: { nom: "DELOR", code: "100" },
-        remorquage: { heure: "12", minute: "59", temps: "8" },
-        atterrissage: { heure: "18", minute: "00" },
-        parachute: "21/23",
-      },
-    ],
-  },
-];
 
 const getPlancheByID = async (req, res) => {
   // pid est un date.getTime() au format string
@@ -116,19 +11,18 @@ const getPlancheByID = async (req, res) => {
   try{
     planche = await Ligne.find({plancheID: plancheID});
   } catch (err){
-    console.log("Aucunes lignes avec cette ID de planche "+ err);
-    return next(err);
+    console.log.error("Aucunes lignes avec cette ID de planche "+ err);
+    process.exit(1);
   }
 
   //console.log(planche);
 
   // Autre erreur possible :
   // Si on a pas pu recuperer de planche
-  if (!planche) {
+  if (planche.length < 1) {
     return res
       .code(404)
       .send({ message: "Aucune planche n'existe avec cet ID" });
-      return;
   }
 
   res.send({
@@ -144,9 +38,11 @@ const getPlancheByID = async (req, res) => {
 };
 
 // Les données (l'objet ligne) se trouve dans le body de la requete
-const ajouteLigne = async (req, res, next) => {
+const ajouteLigne = async (req, res) => {
   const plancheID = parseInt(req.params.pid);
-  //const ligne = req.body;
+
+  // Déplacer le parsing en amont
+  const parsedJSON = JSON.parse(req.body);
 
   // On récupère nos données
   const {
@@ -157,7 +53,7 @@ const ajouteLigne = async (req, res, next) => {
     remorquage,
     atterrissage,
     parachute,
-  } = req.body;
+  } = parsedJSON;
 
   // On les injecte dans un objet ligne (Model mongoose)
   // pas besoin de faire plancheID: plancheID puisque même nom
@@ -171,26 +67,22 @@ const ajouteLigne = async (req, res, next) => {
     atterrissage,
     parachute,
   });
-
-  ligne.volID = nanoid();
-
-  /*const indexPlanche = DUMMY_DATA.indexOf(
-    DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID)
-  );
-  DUMMY_DATA[indexPlanche].data.push(ligne);*/
+  
+  ligne.id = nanoid();
 
   // await pour etre sûr que la donnée est bien entrée dans la DB
   try {
     await ligne.save();
   } catch (err) {
-    console.log("Erreur lors de la sauvegarde dans la base de donnée.");
-    return next(error);
+    fastify.log.error("Erreur lors de la sauvegarde dans la base de donnée.");
+    console.log("Erreur");
+    process.exit(1);
   };
 
   res.status(201).send(ligne);
 };
 
-const modifieLigne = async (req, res, next) => {
+const modifieLigne = async (req, res) => {
   const plancheID = parseInt(req.params.pid);
   
   const {
@@ -208,8 +100,8 @@ const modifieLigne = async (req, res, next) => {
   try {
     ligne = await Ligne.findById(id);
   } catch (err){
-    console.log("Impossible de recuperer cette ligne : "+ err);
-    return next(err);
+    fastify.log.error("Impossible de recuperer cette ligne : "+err);
+    process.exit(1)
   }
 
   /*
@@ -242,8 +134,8 @@ const modifieLigne = async (req, res, next) => {
   try {
     await ligne.save();
   } catch (err){
-    console.log("L'enregistrement de la ligne modifiée a échoué : "+err);
-    return next(err);
+    fastify.log.error("L'enregistrement de la ligne modifiée a échoué : "+err);
+    process.exit(1)
   }
 
   // Puis on remplace
@@ -269,15 +161,15 @@ const supprimeLigne = async (req, res) => {
   try {
     ligne = await Ligne.findById(ligneID);
   } catch (err){
-    console.log("Impossible de recuperer la ligne a supprimer : "+ err);
-    return next(err);
+    fastify.log.error("Impossible de recuperer la ligne a supprimer : "+err);
+    process.exit(1)
   }
 
   try {
     await ligne.remove();
   } catch (err){
-    console.log("Impossible de recuperer la ligne a supprimer : "+ err);
-    return next(err);
+    fastify.log.error("Impossible de recuperer la ligne a supprimer : "+err);
+    process.exit(1)
   }
 
   res.status(200).send({ message: 'Ligne supprimée.'});
