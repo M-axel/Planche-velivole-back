@@ -85,6 +85,10 @@ const ajouteLigne = async (req, res) => {
 const modifieLigne = async (req, res) => {
   const plancheID = parseInt(req.params.pid);
   
+  const parsedJSON = JSON.parse(req.body);
+
+  console.log(parsedJSON);
+
   const {
     id,
     avion,
@@ -94,7 +98,7 @@ const modifieLigne = async (req, res) => {
     remorquage,
     atterrissage,
     parachute,
-  } = req.body;
+  } = parsedJSON;
   
   let ligne;
   try {
@@ -103,24 +107,6 @@ const modifieLigne = async (req, res) => {
     fastify.log.error("Impossible de recuperer cette ligne : "+err);
     process.exit(1)
   }
-
-  /*
-  const planche = DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID);
-  const indexUpdatedPlanche = DUMMY_DATA.indexOf(planche);
-*/
-
-  // On copie la ligne, puis on la modifie afin d'éviter un conflit de modification
-  /*const updatedLine = {
-    ...DUMMY_DATA[indexUpdatedPlanche].data.find(
-      (li) => li.volID === ligne.volID
-    ),
-  };*/
-
-  // Répétitif mais impossible de faire un indexOf avec updatedLine puisque c'est une copie ...
-  /*const indexLine = DUMMY_DATA[indexUpdatedPlanche].data.indexOf(
-    DUMMY_DATA[indexUpdatedPlanche].data.find((li) => li.volID === ligne.volID)
-  );*/
-
   // On modifie
   ligne.avion = avion;
   ligne.planeur = planeur;
@@ -137,26 +123,16 @@ const modifieLigne = async (req, res) => {
     fastify.log.error("L'enregistrement de la ligne modifiée a échoué : "+err);
     process.exit(1)
   }
-
-  // Puis on remplace
-  /*
-  DUMMY_DATA[indexUpdatedPlanche].data[indexLine] = updatedLine;
-  res.send(DUMMY_DATA[indexUpdatedPlanche].data[indexLine]);*/
-
+  
   res.status(200).send({ ligne: ligne.toObject({getters: true}) });
 };
 
 const supprimeLigne = async (req, res) => {
   //const plancheID = parseInt(req.params.pid);
-  const ligneID = req.body.id;
+  const parsedJSON = JSON.parse(req.body);
+  const ligneID = parsedJSON.id;
 
-  /*
-  const indexPlanche = DUMMY_DATA.indexOf(
-    DUMMY_DATA.find((p) => p.plancheID.getTime() === plancheID)
-  );
-  DUMMY_DATA[indexPlanche] = DUMMY_DATA[indexPlanche].data.filter(
-    (li) => li.volID !== ligne.volID
-  );*/
+  //console.log("ID ligne à supprimer " + ligneID);
 
   try {
     ligne = await Ligne.findById(ligneID);
